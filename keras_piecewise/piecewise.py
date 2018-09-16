@@ -2,33 +2,46 @@ import keras
 import keras.backend as K
 
 
-class Piecewise(keras.layers.Layer):
-
-    POOL_TYPE_MAX = 'max'
-    POOL_TYPE_AVERAGE = 'average'
+class Piecewise(keras.layers.Wrapper):
 
     def __init__(self,
+                 layer,
                  piece_num,
-                 pool_type=POOL_TYPE_MAX,
                  **kwargs):
+        """Initialize the wrapper layer.
+
+        :param layer: The layer that process the inner pieces.
+        :param piece_num: The fixed number of pieces for each data.
+        :param kwargs: Arguments for parent.
+        """
+        self.layer = layer
         self.piece_num = piece_num
-        self.pool_type = pool_type
         self.supports_masking = True
-        super(Piecewise, self).__init__(**kwargs)
+        super(Piecewise, self).__init__(layer, **kwargs)
 
     def get_config(self):
         config = {
             'piece_num': self.piece_num,
-            'pool_type': self.pool_type,
         }
         base_config = super(Piecewise, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
     def build(self, input_shape):
+        self.input_spec = list(map(lambda x: keras.engine.InputSpec(shape=x), input_shape))
+        child_input_shape = (None,) + input_shape[0][1:]
+        if not self.layer.built:
+            self.layer.build(child_input_shape)
+            self.layer.built = True
         super(Piecewise, self).build(input_shape)
 
     def call(self, inputs, mask=None, **kwargs):
         inputs, positions = inputs
+        positions = K.concatenate([K.zeros((K.shape(inputs)[0], 1), dtype='int32'), positions], axis=1)
+        print(K.map_fn(
+            lambda i: self._call_sample(inputs, positions, i),
+            K.arange(K.shape(inputs)[0]),
+            dtype=K.floatx(),
+        ))
         return K.map_fn(
             lambda i: self._call_sample(inputs, positions, i),
             K.arange(K.shape(inputs)[0]),
@@ -45,27 +58,13 @@ class Piecewise(keras.layers.Layer):
         )
 
     def _call_piece(self, inputs, positions, index):
-        piece = inputs[K.switch(K.equal(index, 0), 0, positions[index - 1]):positions[index]]
-        return K.switch(
-            K.equal(K.shape(piece)[0], 0),
-            lambda: self._pool_empty(inputs),
-            lambda: self._pool_type(piece),
-        )
-
-    def _pool_empty(self, piece):
-        return K.zeros_like(K.max(piece, axis=0))
-
-    def _pool_type(self, piece):
-        if callable(self.pool_type):
-            return self.pool_type(piece)
-        if self.pool_type == self.POOL_TYPE_MAX:
-            return K.max(piece, axis=0)
-        if self.pool_type == self.POOL_TYPE_AVERAGE:
-            return K.sum(piece, axis=0) / K.cast(K.shape(piece)[0], K.floatx())
-        raise NotImplementedError('No implementation for pooling type : ' + self.pool_type)
+        piece = inputs[positions[index]:positions[index + 1]]
+        return K.squeeze(self.layer.call(inputs=K.expand_dims(piece, axis=0)), axis=0)
 
     def compute_output_shape(self, input_shape):
-        return (input_shape[0][0], self.piece_num) + tuple(input_shape[0][2:])
+        child_input_shape = (None,) + input_shape[0][1:]
+        child_output_shape = self.layer.compute_output_shape(child_input_shape)
+        return (input_shape[0][0], self.piece_num) + child_output_shape[1:]
 
     def compute_mask(self, inputs, mask=None):
         return None
