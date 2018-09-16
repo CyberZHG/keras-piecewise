@@ -40,7 +40,6 @@ class TestPool1D(unittest.TestCase):
         position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
         pool_layer = Piecewise(
             layer=layer,
-            piece_num=piece_num,
         )([data_input, position_input])
         model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
         model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)

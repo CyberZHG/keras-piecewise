@@ -40,10 +40,7 @@ piece_num = len(positions[0])
 
 data_input = keras.layers.Input(shape=(None, None))
 position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
-pool_layer = Piecewise(
-    layer=AvePool1D(),
-    piece_num=piece_num,
-)([data_input, position_input])
+pool_layer = Piecewise(AvePool1D())([data_input, position_input])
 model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
 model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)
 model.summary()
