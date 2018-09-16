@@ -27,6 +27,8 @@ class Piecewise(keras.layers.Wrapper):
 
     def call(self, inputs, mask=None, **kwargs):
         inputs, positions = inputs
+        if K.dtype(positions) != 'int32':
+            positions = K.cast(positions, 'int32')
         positions = K.concatenate([K.zeros((K.shape(inputs)[0], 1), dtype='int32'), positions], axis=1)
         print(K.map_fn(
             lambda i: self._call_sample(inputs, positions, i),

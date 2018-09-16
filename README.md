@@ -48,8 +48,8 @@ model.summary()
 print(model.predict([np.asarray(data), np.asarray(positions)]).tolist())
 # The result will be:
 # [[
-      [1.0, 3.0, 2.0, 5.0],
-      [3.5, 5.0, 4.5, 2.5],
-      [4.0, 7.0, 2.0, 5.0],
+#     [1.0, 3.0, 2.0, 5.0],
+#     [3.5, 5.0, 4.5, 2.5],
+#     [4.0, 7.0, 2.0, 5.0],
 # ]]
 ```

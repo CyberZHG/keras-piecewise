@@ -37,7 +37,7 @@ class TestPool1D(unittest.TestCase):
     @staticmethod
     def _build_model(input_shape, layer, piece_num):
         data_input = keras.layers.Input(shape=input_shape)
-        position_input = keras.layers.Input(shape=(piece_num,), dtype='int32')
+        position_input = keras.layers.Input(shape=(piece_num,))
         pool_layer = Piecewise(
             layer=layer,
         )([data_input, position_input])
