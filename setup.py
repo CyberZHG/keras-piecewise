@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='keras-piecewise',
-    version='0.4',
+    version='0.5',
     packages=['keras_piecewise'],
     url='https://github.com/CyberZHG/keras-piecewise',
     license='MIT',

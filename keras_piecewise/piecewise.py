@@ -19,9 +19,8 @@ class Piecewise(keras.layers.Wrapper):
 
     def build(self, input_shape):
         self.input_spec = list(map(lambda x: keras.engine.InputSpec(shape=x), input_shape))
-        child_input_shape = (None,) + input_shape[0][1:]
         if not self.layer.built:
-            self.layer.build(child_input_shape)
+            self.layer.build(input_shape[0])
             self.layer.built = True
         super(Piecewise, self).build(input_shape)
 
@@ -55,8 +54,7 @@ class Piecewise(keras.layers.Wrapper):
         return K.squeeze(self.layer.call(inputs=K.expand_dims(piece, axis=0)), axis=0)
 
     def compute_output_shape(self, input_shape):
-        child_input_shape = (None,) + input_shape[0][1:]
-        child_output_shape = self.layer.compute_output_shape(child_input_shape)
+        child_output_shape = self.layer.compute_output_shape(input_shape[0])
         return (input_shape[0][0], input_shape[1][1]) + child_output_shape[1:]
 
     def compute_mask(self, inputs, mask=None):
