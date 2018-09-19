@@ -29,11 +29,6 @@ class Piecewise(keras.layers.Wrapper):
         if K.dtype(positions) != 'int32':
             positions = K.cast(positions, 'int32')
         positions = K.concatenate([K.zeros((K.shape(inputs)[0], 1), dtype='int32'), positions], axis=1)
-        print(K.map_fn(
-            lambda i: self._call_sample(inputs, positions, i),
-            K.arange(K.shape(inputs)[0]),
-            dtype=K.floatx(),
-        ))
         return K.map_fn(
             lambda i: self._call_sample(inputs, positions, i),
             K.arange(K.shape(inputs)[0]),
@@ -113,7 +108,6 @@ class Piecewise2D(keras.layers.Wrapper):
         )
 
     def _call_piece(self, inputs, rows, cols, row, col):
-        print(inputs)
         piece = inputs[rows[row - 1]:rows[row], cols[col - 1]:cols[col]]
         return K.squeeze(self.layer.call(inputs=K.expand_dims(piece, axis=0)), axis=0)
 
