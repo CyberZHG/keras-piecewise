@@ -1,1 +1,1 @@
-from .piecewise import Piecewise
+from .piecewise import Piecewise, Piecewise2D

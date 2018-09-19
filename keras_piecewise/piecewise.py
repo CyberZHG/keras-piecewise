@@ -59,3 +59,67 @@ class Piecewise(keras.layers.Wrapper):
 
     def compute_mask(self, inputs, mask=None):
         return None
+
+
+class Piecewise2D(keras.layers.Wrapper):
+
+    def __init__(self,
+                 layer,
+                 **kwargs):
+        """Initialize the wrapper layer.
+
+        :param layer: The layer that process the inner pieces.
+        :param piece_num: The fixed number of pieces for each data.
+        :param kwargs: Arguments for parent.
+        """
+        self.layer = layer
+        self.supports_masking = True
+        super(Piecewise2D, self).__init__(layer, **kwargs)
+
+    def build(self, input_shape):
+        self.input_spec = list(map(lambda x: keras.engine.InputSpec(shape=x), input_shape))
+        if not self.layer.built:
+            self.layer.build(input_shape[0])
+            self.layer.built = True
+        super(Piecewise2D, self).build(input_shape)
+
+    def call(self, inputs, mask=None, **kwargs):
+        inputs, rows, cols = inputs
+        if K.dtype(rows) != 'int32':
+            rows = K.cast(rows, 'int32')
+        if K.dtype(cols) != 'int32':
+            cols = K.cast(cols, 'int32')
+        rows = K.concatenate([K.zeros((K.shape(inputs)[0], 1), dtype='int32'), rows], axis=1)
+        cols = K.concatenate([K.zeros((K.shape(inputs)[0], 1), dtype='int32'), cols], axis=1)
+        return K.map_fn(
+            lambda i: self._call_sample(inputs, rows, cols, i),
+            K.arange(K.shape(inputs)[0]),
+            dtype=K.floatx(),
+        )
+
+    def _call_sample(self, inputs, rows, cols, index):
+        inputs, rows, cols = inputs[index], rows[index], cols[index]
+        return K.map_fn(
+            lambda row: self._call_rows(inputs, rows, cols, row),
+            K.arange(1, K.shape(rows)[0]),
+            dtype=K.floatx(),
+        )
+
+    def _call_rows(self, inputs, rows, cols, row):
+        return K.map_fn(
+            lambda col: self._call_piece(inputs, rows, cols, row, col),
+            K.arange(1, K.shape(cols)[0]),
+            dtype=K.floatx(),
+        )
+
+    def _call_piece(self, inputs, rows, cols, row, col):
+        print(inputs)
+        piece = inputs[rows[row - 1]:rows[row], cols[col - 1]:cols[col]]
+        return K.squeeze(self.layer.call(inputs=K.expand_dims(piece, axis=0)), axis=0)
+
+    def compute_output_shape(self, input_shape):
+        child_output_shape = self.layer.compute_output_shape(input_shape[0])
+        return (input_shape[0][0], input_shape[1][1], input_shape[2][1]) + child_output_shape[1:]
+
+    def compute_mask(self, inputs, mask=None):
+        return None

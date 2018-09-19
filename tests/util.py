@@ -24,3 +24,15 @@ class AvePool1D(keras.layers.Layer):
 
     def compute_output_shape(self, input_shape):
         return (input_shape[0],) + input_shape[2:]
+
+
+class MaxPool2D(keras.layers.Layer):
+
+    def __init__(self, **kwargs):
+        super(MaxPool2D, self).__init__(**kwargs)
+
+    def call(self, inputs):
+        return K.max(K.max(inputs, axis=1), axis=1)
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0],) + input_shape[3:]
