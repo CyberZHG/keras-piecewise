@@ -78,6 +78,8 @@ Usage
    #     [4.0, 7.0, 2.0, 5.0],
    # ]]
 
+The default value for argument ``pos_type`` is ``Piecewise.POS_TYPE_SEGMENTS``\ , which means splitting the input sequences with increasing positions. When ``pos_type`` is ``Piecewise.POS_TYPE_PAIRS``\ , every two positions represent the piece to be extracted.
+
 ``Piecewise2D``
 ^^^^^^^^^^^^^^^^^^^
 

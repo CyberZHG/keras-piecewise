@@ -11,11 +11,12 @@ from .util import MaxPool1D, AvePool1D
 class TestPool1D(unittest.TestCase):
 
     @staticmethod
-    def _build_model(input_shape, layer, piece_num):
+    def _build_model(input_shape, layer, piece_num, pos_type=Piecewise.POS_TYPE_SEGMENTS):
         data_input = keras.layers.Input(shape=input_shape)
         position_input = keras.layers.Input(shape=(piece_num,))
         pool_layer = Piecewise(
             layer=layer,
+            pos_type=pos_type,
         )([data_input, position_input])
         model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
         model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)
@@ -95,3 +96,40 @@ class TestPool1D(unittest.TestCase):
             [2.0, 4.5, 4.5, 3.5],
         ]]
         self.assertEqual(expected, predicts)
+
+    def test_max_2d_pair(self):
+        data = [
+            [1, 3, 9, 2],
+            [1, 9, 8, 2],
+        ]
+        positions = [
+            [1, 4, 0, 2],
+            [2, 4, 2, 3],
+        ]
+        model = self._build_model(
+            input_shape=(None,),
+            layer=MaxPool1D(),
+            piece_num=len(positions[0]),
+            pos_type=Piecewise.POS_TYPE_PAIRS,
+        )
+        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % random.random())
+        model.save(model_path)
+        model = keras.models.load_model(model_path, custom_objects={
+            'Piecewise': Piecewise,
+            'MaxPool1D': MaxPool1D,
+        })
+        predicts = model.predict([np.asarray(data), np.asarray(positions)]).tolist()
+        expected = [
+            [9.0, 3.0],
+            [8.0, 8.0],
+        ]
+        self.assertEqual(expected, predicts)
+
+    def test_pos_type_not_implemented(self):
+        with self.assertRaises(NotImplementedError):
+            self._build_model(
+                input_shape=(None,),
+                layer=MaxPool1D(),
+                piece_num=12,
+                pos_type='whatever',
+            )
