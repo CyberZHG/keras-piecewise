@@ -2,7 +2,13 @@ import keras
 import keras.backend as K
 
 
-class Piecewise(keras.layers.Wrapper):
+try:
+    Wrapper = keras.layers.Wrapper
+except AttributeError:
+    Wrapper = keras.layers.wrappers.Wrapper
+
+
+class Piecewise(Wrapper):
 
     POS_TYPE_SEGMENTS = 'segments'
     POS_TYPE_PAIRS = 'pairs'
@@ -76,7 +82,7 @@ class Piecewise(keras.layers.Wrapper):
         return None
 
 
-class Piecewise2D(keras.layers.Wrapper):
+class Piecewise2D(Wrapper):
 
     POS_TYPE_SEGMENTS = 'segments'
     POS_TYPE_PAIRS = 'pairs'
