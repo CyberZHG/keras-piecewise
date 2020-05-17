@@ -1,9 +1,8 @@
 import unittest
 import os
 import tempfile
-import random
-import keras
 import numpy as np
+from keras_piecewise.backend import keras
 from keras_piecewise import Piecewise2D
 from .util import MaxPool2D
 
@@ -76,7 +75,7 @@ class TestPool2D(unittest.TestCase):
             col_num=len(cols[0]),
             pos_type=Piecewise2D.POS_TYPE_PAIRS,
         )
-        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % random.random())
+        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % np.random.random())
         model.save(model_path)
         model = keras.models.load_model(model_path, custom_objects={
             'Piecewise2D': Piecewise2D,

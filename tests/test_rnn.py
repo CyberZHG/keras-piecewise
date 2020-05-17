@@ -1,6 +1,7 @@
 import unittest
-import keras
 import numpy as np
+from keras_piecewise.backend import keras
+from keras_piecewise.backend import TF_KERAS
 from keras_piecewise import Piecewise
 
 
@@ -14,11 +15,13 @@ class TestRNN(unittest.TestCase):
             layer=layer,
         )([data_input, position_input])
         model = keras.models.Model(inputs=[data_input, position_input], outputs=pool_layer)
-        model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.mean_squared_error)
+        model.compile(optimizer='adam', loss='mse')
         model.summary()
         return model
 
     def test_lstm(self):
+        if not TF_KERAS:
+            return
         data = [[[1, 3, 2, 5], [7, 4, 2, 3], [0, 1, 2, 2], [4, 7, 2, 5]]]
         positions = [[1, 2, 4]]
         model = self._build_model(

@@ -1,9 +1,8 @@
 import os
 import tempfile
-import random
 import unittest
-import keras
 import numpy as np
+from keras_piecewise.backend import keras
 from keras_piecewise import Piecewise
 from .util import MaxPool1D, AvePool1D
 
@@ -84,7 +83,7 @@ class TestPool1D(unittest.TestCase):
             layer=AvePool1D(),
             piece_num=len(positions[0]),
         )
-        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % random.random())
+        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % np.random.random())
         model.save(model_path)
         model = keras.models.load_model(model_path, custom_objects={
             'Piecewise': Piecewise,
@@ -112,7 +111,7 @@ class TestPool1D(unittest.TestCase):
             piece_num=len(positions[0]),
             pos_type=Piecewise.POS_TYPE_PAIRS,
         )
-        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % random.random())
+        model_path = os.path.join(tempfile.gettempdir(), 'keras_piece_test_save_load_%f.h5' % np.random.random())
         model.save(model_path)
         model = keras.models.load_model(model_path, custom_objects={
             'Piecewise': Piecewise,

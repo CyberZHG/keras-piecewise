@@ -1,1 +1,3 @@
-from .piecewise import Piecewise, Piecewise2D
+from .piecewise import *
+
+__version__ = '0.14.0'
