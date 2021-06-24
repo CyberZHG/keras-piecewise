@@ -1,8 +1,9 @@
 # Keras Piecewise
 
-[![Travis](https://travis-ci.org/CyberZHG/keras-piecewise.svg)](https://travis-ci.org/CyberZHG/keras-piecewise)
+[![Travis](https://travis-ci.com/CyberZHG/keras-piecewise.svg)](https://travis-ci.org/CyberZHG/keras-piecewise)
 [![Coverage](https://coveralls.io/repos/github/CyberZHG/keras-piecewise/badge.svg?branch=master)](https://coveralls.io/github/CyberZHG/keras-piecewise)
-[![PyPI](https://img.shields.io/pypi/pyversions/keras-piecewise.svg)](https://pypi.org/project/keras-piecewise/)
+
+**This repo is outdated and will no longer be maintained.**
 
 A wrapper layer for splitting and accumulating sequential data.
 
@@ -11,7 +12,7 @@ A wrapper layer for splitting and accumulating sequential data.
 ## Install
 
 ```bash
-pip install keras-piecewise-pooling
+pip install git+https://github.com/cyberzhg/keras-piecewise.git
 ```
 
 ## Usage
